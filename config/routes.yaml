@@ -1,0 +1,9 @@
+# Rutas para controlador: USUARIO
+user:
+  path: /user
+  controller: App\Controller\UserController::index
+
+  # Rutas para controlador: COMENTARIO
+comentario:
+  path: /comentario
+  controller: App\Controller\ComentarioController::index
