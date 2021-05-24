@@ -173,16 +173,96 @@ class UserController extends AbstractController
             return new JsonResponse($signup);
         }
     }
-    public function edit (Request $request){
+    public function edit (Request $request, JwtAuth $jwt_auth){
         //Recoger cabecera de autentificacion
-        //Crear metodo para comprobar si el token es correcto
-        //Si es correcto hacer la actualizacion del usuario
-
+        $token = $request ->headers->get('Authorization');
+        //Respuesta por defecto
         $data=[
             'message' => 'error',
-            'code'=> 200,
-            'path' => 'Metodo update'
+            'code'=> 400,
+            'path' => 'USUARIO No actualizado'
         ];
+        //Crear metodo para comprobar si el token es correcto
+        $authCheck = $jwt_auth->checkToken($token);
+        //Si es correcto hacer la actualizacion del usuario
+        if($authCheck){
+        //Actualizar al usuario
+            //Consegir entity manager
+            $em=$this->getDoctrine()->getManager();
+            //Consegir los datos del usuario identificado
+            $identity=$jwt_auth->checkToken($token, true);
+            //Consegir el usuario a actualizar completo
+            $user_repo = $this->getDoctrine()->getRepository(User::class);
+            $user = $user_repo->findOneBy([
+                'uid'=> $identity->uid
+            ]);
+            //Recoger dato por post
+            $json = $request->get('json', null);
+            $params = json_decode($json);
+            //comprobar y validar datos
+            if(!empty($json)){
+                $uemail = (!empty($params->uemail)) ? $params->uemail:null;
+                $upassword = (!empty($params->upassword)) ? $params->upassword:null;
+                $urole = (!empty($params->urole)) ? $params->urole:null;
+                $unombre = (!empty($params->unombre)) ? $params->unombre:null;
+                $uapellidos = (!empty($params->uapellidos)) ? $params->uapellidos:null;
+                $utelefono = (!empty($params->utelefono)) ? $params->utelefono:null;
+                $udireccion = (!empty($params->udireccion)) ? $params->udireccion:null;
+                $ucreatedAt = (!empty($params->ucreatedAt)) ? $params->ucreatedAt:null;
+                $udeleteAt = (!empty($params->udeleteAt)) ? $params->udeleteAt:null;
+    
+                $validator = Validation::createValidator();
+                $validate_email=$validator->validate($uemail, [new Email()]);
+    
+                if(!empty($uemail) 
+                && count($validate_email)==0 
+                && !empty($upassword)
+                && !empty($urole)
+                && !empty($unombre)
+                && !empty($uapellidos)
+                && !empty($utelefono)
+                && !empty($udireccion)){
+                    //Asignar nuevos datos al objeto usuario
+                    $user->setUemail($uemail);
+                    $user->setUrole($urole);
+                    $user->setUnombre($unombre);
+                    $user->setUapellidos($uapellidos);
+                    $user->setUtelefono($utelefono);
+                    $user->setUdireccion($udireccion);
+                   
+                    //Cifrar contraseña
+                    $pwd = hash('sha256', $upassword);
+                    $user -> setUpassword($pwd);
+                    //Comprobar duplicados
+                    $isset_user = $user_repo->findBy([
+                        'uemail'=> $uemail
+                    ]);
+                    if(count($isset_user)==0 || $identity->uemail ==$uemail){
+                         //Guardar cambios en la BD
+                        $em->persist($user);
+                        $em->flush();
+                        $data=[
+                            'message' => 'sucess',
+                            'code'=> 200,
+                            'path' => 'Usuario actualizado correctamente',
+                            'user' => $user
+                        ];
+                    }else{
+                        $data=[
+                            'message' => 'error',
+                            'code'=> 400,
+                            'path' => 'No puedes usar ese email'
+                        ];
+                    } 
+                }
+            }else{
+                $data=[
+                    'message' => 'errorj',
+                    'code'=> 400,
+                    'path' => 'USUARIO No actualizado'
+                ];
+            }
+        }
         return $this->resjson($data);
     }
 }
