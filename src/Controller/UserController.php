@@ -11,6 +11,7 @@ use Symfony\Component\Validator\Constraints\Email;
 
 use App\Entity\User;
 use App\Entity\Comentario;
+use App\Services\JwtAuth;
 
 class UserController extends AbstractController
 {
@@ -137,5 +138,51 @@ class UserController extends AbstractController
         //Hacer respuesta en json
         //return $this->resjson($data);
         return new JsonResponse($data);
+    }
+    public function login(Request $request, JwtAuth $jwt_auth){
+        //Recojer los datos por post
+        $json = $request->get('json', null);
+        //Descodificar json
+        $params= json_decode($json);
+        //Respuesta por defecto
+        $data=[
+            'message' => 'error',
+            'code'=> 200,
+            'path' => 'El usuario no se ha identificado'
+        ];
+        //Comprobar y validad datos
+        if($json !=null){
+            $uemail = (!empty($params->uemail)) ? $params->uemail:null;
+            $upassword = (!empty($params->upassword)) ? $params->upassword:null;
+            $gettoken = (!empty($params->gettoken)) ? $params->gettoken:null;
+        }
+        $validator = Validation::createValidator();
+        $validate_email=$validator->validate($uemail, [new Email()]);
+
+        if(!empty($uemail) && count($validate_email)==0  && !empty($upassword)){
+            //Cifrar contraseña
+            $pwd = hash('sha256', $upassword);
+            //Si todo es valido, llamaremos a un servicio para identificar al usuario (jwt, token o un objeto)
+            if($gettoken){
+                $signup = $jwt_auth->signup($uemail, $pwd, $gettoken);
+            }
+            else{
+                $signup = $jwt_auth->signup($uemail, $pwd);
+            }
+            //Hacer respuesta en json
+            return new JsonResponse($signup);
+        }
+    }
+    public function edit (Request $request){
+        //Recoger cabecera de autentificacion
+        //Crear metodo para comprobar si el token es correcto
+        //Si es correcto hacer la actualizacion del usuario
+
+        $data=[
+            'message' => 'error',
+            'code'=> 200,
+            'path' => 'Metodo update'
+        ];
+        return $this->resjson($data);
     }
 }
