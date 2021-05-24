@@ -2,8 +2,15 @@
 user:
   path: /user
   controller: App\Controller\UserController::index
+  methods: [GET]
+
+register:
+  path: /register
+  controller: App\Controller\UserController::create
+  methods: [POST]
 
   # Rutas para controlador: COMENTARIO
 comentario:
   path: /comentario
   controller: App\Controller\ComentarioController::index
+  methods: [GET]

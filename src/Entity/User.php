@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * User
@@ -10,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="user")
  * @ORM\Entity
  */
-class User
+class User implements \JsonSerializable
 {
     /**
      * @var int
@@ -83,6 +85,14 @@ class User
      * @ORM\Column(name="uDelete_at", type="datetime", nullable=true)
      */
     private $udeleteAt;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Comentario", mappedBy="coidusuariofk")
+     */
+    private $comentarios;
+    public function __construct(){
+        $this->comentarios = new ArrayCollection();
+    }
 
     public function getUid(): ?int
     {
@@ -196,6 +206,27 @@ class User
 
         return $this;
     }
+    
+    /*
+     * @return Collection|comentarios[]
+     */
 
+    public function getComentarios():Collection{
+        return $this->comentarios;
+    }
 
+    public function jsonSerialize(): array{
+        return[
+            'uid' => $this-> uid,
+            'uemail' => $this-> uemail,
+            'upassword' => $this-> upassword,
+            'urole' => $this-> urole,
+            'unombre' => $this-> unombre,
+            'uapellidos' => $this-> uapellidos,
+            'utelefono' => $this-> utelefono,
+            'udireccion' => $this-> udireccion,
+            'ucreatedAt' => $this-> ucreatedAt,
+            'udeleteAt' => $this-> udeleteAt
+        ];
+    }
 }

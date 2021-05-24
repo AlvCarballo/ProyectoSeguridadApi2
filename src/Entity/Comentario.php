@@ -59,7 +59,7 @@ class Comentario
     /**
      * @var \User
      *
-     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="comentarios")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="coIdUsuarioFK", referencedColumnName="uId")
      * })
@@ -142,6 +142,6 @@ class Comentario
 
         return $this;
     }
-
+   
 
 }
