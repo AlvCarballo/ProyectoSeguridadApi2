@@ -39,8 +39,8 @@ class UserController extends AbstractController
         $comentarios = $comentario_repo->findAll();
 
         $data=[
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/UserController.php',
+            'status' => 'Welcome to your new controller!',
+            'message' => 'src/Controller/UserController.php',
         ];
         // foreach($users as $user){
         //     echo "<h1>{$user->getUnombre()} {$user->getUapellidos()}</h1>";
@@ -60,9 +60,9 @@ class UserController extends AbstractController
         $params= json_decode($json);
         //Respuesta por defecto
         $data=[
-            'message' => 'Error',
-            'code'=> 200,
-            'path' => 'El usuario no se ha creado'
+            'status' => 'error',
+            'code'=> 400,
+            'message' => 'Error al crear el usuario'
         ];
         //Comprobar y validad datos
         if($json !=null){
@@ -111,23 +111,24 @@ class UserController extends AbstractController
                     $em->persist($user);
                     $em->flush();
                     $data=[
-                        'message' => 'sucess',
+                        'status' => 'success',
                         'code'=> 200,
-                        'path' => 'Usuario creado correctamente'
+                        'message' => 'Usuario creado',
+                        'user' => $user
                     ];
                 }else{
                     $data=[
-                        'message' => 'error',
+                        'status' => 'error',
                         'code'=> 400,
-                        'path' => 'El usuario ya existe'
+                        'message' => 'El usuario ya existe'
                     ];
                 }
             }else{
                 //Indicamos que no paso la validacion de datos
                 $data=[
-                    'message' => 'sucess',
+                    'status' => 'error',
                     'code'=> 200,
-                    'path' => 'Validacion Incorrecta'
+                    'message' => 'Error en la validacion de los datos, usuario no creado'
                 ];
             }
         }
@@ -144,9 +145,9 @@ class UserController extends AbstractController
         $params= json_decode($json);
         //Respuesta por defecto
         $data=[
-            'message' => 'error',
-            'code'=> 200,
-            'path' => 'El usuario no se ha identificado'
+            'status' => 'error',
+            'code'=> 400,
+            'message' => 'Error al logearse'
         ];
         //Comprobar y validad datos
         if($json !=null){
@@ -176,9 +177,9 @@ class UserController extends AbstractController
         $token = $request ->headers->get('Authorization');
         //Respuesta por defecto
         $data=[
-            'message' => 'error',
+            'status' => 'error',
             'code'=> 400,
-            'path' => 'USUARIO No actualizado'
+            'message' => 'USUARIO No actualizado'
         ];
         //Crear metodo para comprobar si el token es correcto
         $authCheck = $jwt_auth->checkToken($token);
@@ -238,24 +239,24 @@ class UserController extends AbstractController
                         $em->persist($user);
                         $em->flush();
                         $data=[
-                            'message' => 'sucess',
+                            'status' => 'success',
                             'code'=> 200,
-                            'path' => 'Usuario actualizado correctamente',
+                            'message' => 'Usuario actualizado correctamente',
                             'user' => $user
                         ];
                     }else{
                         $data=[
-                            'message' => 'error',
+                            'status' => 'error',
                             'code'=> 400,
-                            'path' => 'No puedes usar ese email'
+                            'message' => 'No puedes usar ese email'
                         ];
                     } 
                 }
             }else{
                 $data=[
-                    'message' => 'errorj',
+                    'status' => 'errorj',
                     'code'=> 400,
-                    'path' => 'USUARIO No actualizado'
+                    'message' => 'USUARIO No actualizado'
                 ];
             }
         }

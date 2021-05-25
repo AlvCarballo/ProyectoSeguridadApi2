@@ -31,8 +31,8 @@ class ComentarioController extends AbstractController
     public function index(): Response
     {
         return $this->json([
-            'message' => 'Welcome to your new controller!',
-            'path' => 'src/Controller/ComentarioController.php',
+            'status' => 'Welcome to your new controller!',
+            'message' => 'src/Controller/ComentarioController.php',
         ]);
     }
     public function create(Request $request, JwtAuth $jwt_auth){
@@ -75,17 +75,17 @@ class ComentarioController extends AbstractController
                  $em->persist($comentario);
                  $em->flush();
                  $data=[
-                     'message' => 'sucess',
+                     'status' => 'success',
                      'code'=> 200,
-                     'path' => 'Comentario creado correctamente',
+                     'message' => 'Comentario creado correctamente',
                      'comentario' => $comentario
                  ];
             }else{
                 //Respuesta por defecto
             $data=[
-                'message' => 'Error',
+                'status' => 'error',
                 'code'=> 400,
-                'path' => 'El comentario no ha podido crearse'
+                'message' => 'error al crear el comentario'
                 ];
             }
         }
@@ -95,9 +95,9 @@ class ComentarioController extends AbstractController
 
     public function listComentarios (Request $request, PaginatorInterface $paginator){
         $data=[
-            'message' => 'Error',
+            'status' => 'error',
             'code'=> 400,
-            'path' => 'El comentario no ha podido listarse'
+            'message' => 'No se han podido listar los comentarios'
             ];
         $em = $this->getDoctrine()->getManager();
         //recorrer el parametro page de la url
@@ -119,7 +119,7 @@ class ComentarioController extends AbstractController
         $total = $pagination->getTotalItemCount();
         //Preparar el array de datos a devolver
         $data=[
-            'message' => 'success',
+            'status' => 'success',
             'code'=> 200,
             'total_items_count' => $total,
             'page_actual' => $page,
@@ -157,7 +157,7 @@ class ComentarioController extends AbstractController
             $total = $pagination->getTotalItemCount();
             //Preparar el array de datos a devolver
             $data=[
-                'message' => 'success',
+                'status' => 'success',
                 'code'=> 200,
                 'total_items_count' => $total,
                 'page_actual' => $page,
@@ -168,11 +168,11 @@ class ComentarioController extends AbstractController
                 ];
         }else{
             //Respuesta por defecto
-        $data=[
-            'message' => 'Error',
-            'code'=> 400,
-            'path' => 'El comentario no ha podido listarse'
-            ];
+            $data=[
+                'status' => 'error',
+                'code'=> 400,
+                'message' => 'No se han podido listar los comentarios'
+                ];
         }
         //Devolver una respuesta
         return $this->resjson($data);
