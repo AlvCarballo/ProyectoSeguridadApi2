@@ -24,3 +24,8 @@ comentario:
   path: /comentario
   controller: App\Controller\ComentarioController::index
   methods: [GET]
+
+comentario_new:
+  path: /comentario/new
+  controller: App\Controller\ComentarioController::create
+  methods: [POST]

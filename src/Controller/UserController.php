@@ -73,8 +73,6 @@ class UserController extends AbstractController
             $uapellidos = (!empty($params->uapellidos)) ? $params->uapellidos:null;
             $utelefono = (!empty($params->utelefono)) ? $params->utelefono:null;
             $udireccion = (!empty($params->udireccion)) ? $params->udireccion:null;
-            $ucreatedAt = (!empty($params->ucreatedAt)) ? $params->ucreatedAt:null;
-            $udeleteAt = (!empty($params->udeleteAt)) ? $params->udeleteAt:null;
 
             $validator = Validation::createValidator();
             $validate_email=$validator->validate($uemail, [new Email()]);
@@ -208,8 +206,6 @@ class UserController extends AbstractController
                 $uapellidos = (!empty($params->uapellidos)) ? $params->uapellidos:null;
                 $utelefono = (!empty($params->utelefono)) ? $params->utelefono:null;
                 $udireccion = (!empty($params->udireccion)) ? $params->udireccion:null;
-                $ucreatedAt = (!empty($params->ucreatedAt)) ? $params->ucreatedAt:null;
-                $udeleteAt = (!empty($params->udeleteAt)) ? $params->udeleteAt:null;
     
                 $validator = Validation::createValidator();
                 $validate_email=$validator->validate($uemail, [new Email()]);
