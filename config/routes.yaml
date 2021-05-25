@@ -29,3 +29,13 @@ comentario_new:
   path: /comentario/new
   controller: App\Controller\ComentarioController::create
   methods: [POST]
+
+comentario_list:
+  path: /comentario/list
+  controller: App\Controller\ComentarioController::listComentarios
+  methods: [GET]
+
+comentario_list_user:
+  path: /comentario/listuser
+  controller: App\Controller\ComentarioController::listComentariosUser
+  methods: [GET]

@@ -214,19 +214,15 @@ class User implements \JsonSerializable
     public function getComentarios():Collection{
         return $this->comentarios;
     }
-
-    public function jsonSerialize(): array{
+    public function jsonSerialize(){
+        return $this-> uid;
+    }
+    public function jsonSerialize2(): array{
         return[
             'uid' => $this-> uid,
             'uemail' => $this-> uemail,
-            'upassword' => $this-> upassword,
-            'urole' => $this-> urole,
             'unombre' => $this-> unombre,
-            'uapellidos' => $this-> uapellidos,
-            'utelefono' => $this-> utelefono,
-            'udireccion' => $this-> udireccion,
-            'ucreatedAt' => $this-> ucreatedAt,
-            'udeleteAt' => $this-> udeleteAt
+            'uapellidos' => $this-> uapellidos
         ];
     }
 }

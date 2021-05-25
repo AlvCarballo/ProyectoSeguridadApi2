@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints\Email;
+use Knp\Component\Pager\PaginatorInterface;
 
 use App\Entity\User;
 use App\Entity\Comentario;
@@ -84,14 +85,95 @@ class ComentarioController extends AbstractController
             $data=[
                 'message' => 'Error',
                 'code'=> 400,
-                'path' => 'El video no ha podido crearse'
+                'path' => 'El comentario no ha podido crearse'
                 ];
             }
         }
-        //Guardar el nuevo video favorito en la BD
-        
+        //Devolver una respuesta
+        return $this->resjson($data);
+    }
 
+    public function listComentarios (Request $request, PaginatorInterface $paginator){
+        $data=[
+            'message' => 'Error',
+            'code'=> 400,
+            'path' => 'El comentario no ha podido listarse'
+            ];
+        $em = $this->getDoctrine()->getManager();
+        //recorrer el parametro page de la url
+        $page = $request->query->getInt('page', 1);
+        $items_per_page= $request->query->getInt('itemspage', 5);
+        $pagina=$request->query->get('pagina', null);
+        //Hacer la consulta para paginar
+        if($pagina !=null){
+            $dql="SELECT c FROM App\Entity\Comentario c WHERE c.copagina={$pagina} ORDER BY c.cocreatedAt DESC";
+            
+        }else{
+            $dql="SELECT c FROM App\Entity\Comentario c ORDER BY c.cocreatedAt DESC";
+        }
+        //Ejecutar la consulta
+        $query = $em->createQuery($dql);
         
+        //Invocar paginacion
+        $pagination= $paginator->paginate($query, $page, $items_per_page);
+        $total = $pagination->getTotalItemCount();
+        //Preparar el array de datos a devolver
+        $data=[
+            'message' => 'success',
+            'code'=> 200,
+            'total_items_count' => $total,
+            'page_actual' => $page,
+            'items_per_page' => $items_per_page,
+            'total_pages' => ceil($total / $items_per_page),
+            'comentarios' => $pagination
+            ];
+        //Devolver una respuesta
+        return $this->resjson($data);
+    }
+    public function listComentariosUser (Request $request, JwtAuth $jwt_auth, PaginatorInterface $paginator){
+        //Recoger el token
+        $token = $request ->headers->get('Authorization');
+        //Comprobar si es correcto
+        $authCheck = $jwt_auth->checkToken($token);
+        //si es valido
+        if($authCheck){
+            //Conseguir la identidad del usuario
+            $identity=$jwt_auth->checkToken($token, true);
+            $em = $this->getDoctrine()->getManager();
+            //recorrer el parametro page de la url
+            $page = $request->query->getInt('page', 1);
+            $items_per_page= $request->query->getInt('itemspage', 5);
+            $pagina=$request->query->get('pagina');
+            //Hacer la consulta para paginar
+            if($pagina !=null){
+                $dql="SELECT c FROM App\Entity\Comentario c WHERE c.coidusuariofk={$identity->uid} AND c.copagina={$pagina} ORDER BY c.cocreatedAt DESC";
+            }else{
+                $dql="SELECT c FROM App\Entity\Comentario c WHERE c.coidusuariofk={$identity->uid} ORDER BY c.cocreatedAt DESC";
+            }
+            //Ejecutar la consulta
+            $query = $em->createQuery($dql);
+            //Invocar paginacion
+            $pagination= $paginator->paginate($query, $page, $items_per_page);
+            $total = $pagination->getTotalItemCount();
+            //Preparar el array de datos a devolver
+            $data=[
+                'message' => 'success',
+                'code'=> 200,
+                'total_items_count' => $total,
+                'page_actual' => $page,
+                'items_per_page' => $items_per_page,
+                'total_pages' => ceil($total / $items_per_page),
+                'comentarios' => $pagination,
+                'uid' => $identity->uid
+                ];
+        }else{
+            //Respuesta por defecto
+        $data=[
+            'message' => 'Error',
+            'code'=> 400,
+            'path' => 'El comentario no ha podido listarse'
+            ];
+        }
         //Devolver una respuesta
         return $this->resjson($data);
     }
