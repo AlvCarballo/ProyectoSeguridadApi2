@@ -30,6 +30,11 @@ comentario_new:
   controller: App\Controller\ComentarioController::create
   methods: [POST]
 
+comentario_edit:
+  path: /comentario/edit/{id}
+  controller: App\Controller\ComentarioController::comentarioEdit
+  methods: [PUT]
+
 comentario_list:
   path: /comentario/list
   controller: App\Controller\ComentarioController::listComentarios
@@ -39,3 +44,8 @@ comentario_list_user:
   path: /comentario/listuser
   controller: App\Controller\ComentarioController::listComentariosUser
   methods: [GET]
+
+comentario_remove:
+  path: /comentario/remove/{id}
+  controller: App\Controller\ComentarioController::comentarioremove
+  methods: [DELETE]

@@ -92,7 +92,6 @@ class ComentarioController extends AbstractController
         //Devolver una respuesta
         return $this->resjson($data);
     }
-
     public function listComentarios (Request $request, PaginatorInterface $paginator){
         $data=[
             'status' => 'error',
@@ -173,6 +172,129 @@ class ComentarioController extends AbstractController
                 'code'=> 400,
                 'message' => 'No se han podido listar los comentarios'
                 ];
+        }
+        //Devolver una respuesta
+        return $this->resjson($data);
+    }
+    public function comentarioremove (Request $request, JwtAuth $jwt_auth, $id = null){
+        //Recoger el token
+        $token = $request ->headers->get('Authorization');
+        //Comprobar si es correcto
+        $authCheck = $jwt_auth->checkToken($token);
+        //si es valido
+        if($authCheck){
+            //Conseguir la identidad del usuario
+            $identity=$jwt_auth->checkToken($token, true);
+            $doctrine = $this->getDoctrine();
+            $em =  $doctrine->getManager();
+            $comentario =  $doctrine->getRepository(Comentario::class)->findOneBy(['coid'=>$id]);
+           
+            if($comentario && is_object($comentario) && $identity->uid == $comentario->getCoidusuariofk()->getUid()){
+                 $em->remove($comentario);
+                 $em->flush();
+                //Preparar el array de datos a devolver
+            $data=[
+                'status' => 'success',
+                'code'=> 200,
+                'message' => 'Comentario borrado',
+                'comentario' => $comentario
+                ];
+            }  
+            else{
+                //Respuesta por defecto
+                $data=[
+                    'status' => 'error',
+                    'code'=> 400,
+                    'message' => 'El comentario no se puedo borrar pertenece a otro usuario'
+                    ];
+            }
+        }
+        else{
+            //Respuesta por defecto
+            $data=[
+                'status' => 'error',
+                'code'=> 400,
+                'message' => 'No se ha podido borrar el comentario'
+                ];
+        }
+        //Devolver una respuesta
+        return $this->resjson($data);
+    }
+    public function comentarioEdit (Request $request, JwtAuth $jwt_auth, $id=null){
+
+        //Recoger el token
+        $token = $request ->headers->get('Authorization');
+        //Comprobar si es correcto
+        $authCheck = $jwt_auth->checkToken($token);
+        if($authCheck){
+             //Recogerdatos por post
+            $json = $request->get('json', null);
+            $params = json_decode($json);
+        }
+        
+        //Recoger el objeto del usuario identificado
+        $identity=$jwt_auth->checkToken($token, true);
+        //Comprobar y validar datos
+        
+        if(!empty($json)){
+            $coidusuariofk = ($identity->uid != null) ? $identity->uid:null;
+            $cotitle = (!empty($params->cotitle)) ? $params->cotitle:null;
+            $cocomentario = (!empty($params->cocomentario)) ? $params->cocomentario:null;
+            $copagina = (!empty($params->copagina)) ? $params->copagina:null;
+            
+            if(!empty($coidusuariofk) && !empty($cotitle) && !empty($cocomentario) && !empty($copagina)){
+               
+                //Indicamos que el campo coidusuariofk es uid
+                $em = $this->getDoctrine()->getManager();
+                $user = $this->getDoctrine()->getRepository(User::class)->findOneBy(['uid'=>$coidusuariofk]);
+                
+                if($id !=null){
+                     //Crear y guardar objeto
+                    $comentario = $this->getDoctrine()->getRepository(Comentario::class)->findOneBy([
+                        'coid' => $id,
+                        'coidusuariofk' => $identity->uid
+                        ]);
+                    if($comentario && is_object($comentario)){
+                        //Asignar nuevos datos al objeto usuario
+                        $comentario->setCoidusuariofk($user);
+                        $comentario->setcotitle($cotitle);
+                        $comentario->setcocomentario($cocomentario);
+                        $comentario->setcopagina($copagina);
+                        $comentario->setCocreatedAt(new \Datetime('now'));
+                        $comentario->setCodeleteAt(new \Datetime('1900-01-01 00:00:00'));
+
+                        //Guardar en la BD
+                        $em->persist($comentario);
+                        $em->flush();
+                        $data=[
+                            'status' => 'success',
+                            'code'=> 200,
+                            'message' => 'Comentario editado correctamente',
+                            'comentario' => $comentario
+                        ];
+                    }else{
+                        $data=[
+                            'status' => 'error',
+                            'code'=> 400,
+                            'message' => 'El comentario no te pertenece, no puedes editarlo'
+                            ];
+                    }
+                }else{
+                    $data=[
+                        'status' => 'error',
+                        'code'=> 400,
+                        'message' => 'Falta el identificador del comentario'
+                        ];
+                }
+               
+            }else{
+                //Respuesta por defecto
+            $data=[
+                'status' => 'error',
+                'code'=> 400,
+                'message' => 'error al editar el comentario'
+                ];
+            }
         }
         //Devolver una respuesta
         return $this->resjson($data);
