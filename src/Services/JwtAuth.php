@@ -49,8 +49,8 @@ class JwtAuth{
             }
         }else{
             $data=[
-                'message' => 'error',
-                'code'=> 200,
+                'status' => 'error',
+                'code'=> 400,
                 'path' => 'Login Incorrecto'
             ];
         }
